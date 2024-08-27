@@ -25,11 +25,20 @@ cc_library(
 pkg_files(
     name = "proto_srcs",
     srcs = [
+        ":environment_cs",
         ":face_geometry_cs",
         ":face_geometry_graph_options_cs",
         ":mesh_3d_cs",
     ],
     prefix = "Tasks/Vision/FaceGeometry/Proto",
+)
+
+csharp_proto_src(
+    name = "environment_cs",
+    proto_src = "mediapipe/tasks/cc/vision/face_geometry/proto/environment.proto",
+    deps = [
+        "@mediapipe//mediapipe/tasks/cc/vision/face_geometry/proto:protos_src",
+    ],
 )
 
 csharp_proto_src(

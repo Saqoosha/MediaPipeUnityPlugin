@@ -13,6 +13,7 @@ pkg_files(
     name = "proto_srcs",
     srcs = [
         ":face_geometry_pipeline_calculator_options_cs",
+        ":face_geometry_env_generator_calculator_options_cs",
     ],
     prefix = "Tasks/Vision/FaceGeometry",
 )
@@ -23,6 +24,17 @@ csharp_proto_src(
     deps = [
         "@mediapipe//mediapipe/tasks/cc/core/proto:protos_src",
         "@mediapipe//mediapipe/tasks/cc/vision/face_geometry/calculators:protos_src",
+        "@mediapipe//mediapipe/framework:protos_src",
+    ],
+)
+
+csharp_proto_src(
+    name = "face_geometry_env_generator_calculator_options_cs",
+    proto_src = "mediapipe/tasks/cc/vision/face_geometry/calculators/env_generator_calculator.proto",
+    deps = [
+        "@mediapipe//mediapipe/tasks/cc/core/proto:protos_src",
+        "@mediapipe//mediapipe/tasks/cc/vision/face_geometry/calculators:protos_src",
+        "@mediapipe//mediapipe/tasks/cc/vision/face_geometry/proto:protos_src",
         "@mediapipe//mediapipe/framework:protos_src",
     ],
 )
