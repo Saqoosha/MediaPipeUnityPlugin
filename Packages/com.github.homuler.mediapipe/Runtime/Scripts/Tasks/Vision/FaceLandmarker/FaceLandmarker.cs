@@ -6,6 +6,7 @@
 
 using System.Collections.Generic;
 using Mediapipe.Tasks.Components.Containers;
+using Mediapipe.Tasks.Vision.FaceGeometry;
 
 namespace Mediapipe.Tasks.Vision.FaceLandmarker
 {
@@ -100,11 +101,40 @@ namespace Mediapipe.Tasks.Vision.FaceLandmarker
           string.Join(":", _NORM_RECT_TAG, _NORM_RECT_STREAM_NAME),
         },
         outputStreams: outputStreams,
+        inputSidePackets: new List<string> { "ENVIRONMENT:environment" },
         taskOptions: options);
 
       var faceGeometriesForRead = options.outputFaceTransformationMatrixes ? new List<FaceGeometry.Proto.FaceGeometry>(options.numFaces) : null;
+
+      var graph = taskInfo.GenerateGraphConfig(options.runningMode == Core.RunningMode.LIVE_STREAM);
+
+      var environment = new FaceGeometry.Proto.Environment()
+      {
+        OriginPointLocation = FaceGeometry.Proto.OriginPointLocation.TopLeftCorner,
+        PerspectiveCamera = new FaceGeometry.Proto.PerspectiveCamera()
+        {
+          VerticalFovDegrees = 20f,
+          Near = 1.0f,
+          Far = 10000.0f,
+        }
+      };
+
+      var optionss = new CalculatorOptions();
+      optionss.SetExtension(FaceGeometryEnvGeneratorCalculatorOptions.Extensions.Ext, new FaceGeometryEnvGeneratorCalculatorOptions()
+      {
+        Environment = environment,
+      });
+
+      graph.Node.Insert(0, new CalculatorGraphConfig.Types.Node()
+      {
+        Calculator = "mediapipe.tasks.vision.face_geometry.FaceGeometryEnvGeneratorCalculator",
+        OutputSidePacket = { "ENVIRONMENT:environment" },
+        Options = optionss,
+      });
+      UnityEngine.Debug.Log(graph.ToString());
+
       return new FaceLandmarker(
-        taskInfo.GenerateGraphConfig(options.runningMode == Core.RunningMode.LIVE_STREAM),
+        graph,
         options.runningMode,
         gpuResources,
         faceGeometriesForRead,
