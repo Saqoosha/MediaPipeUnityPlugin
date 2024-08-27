@@ -314,20 +314,23 @@ namespace Mediapipe.Tasks.Vision.FaceLandmarker
       }
 
       var faceTransformationMatrixes = result.facialTransformationMatrixes;
+      var faceMeshes = result.faceMeshes;
       using var faceTransformationMatrixesPacket = outputPackets.At<List<FaceGeometry.Proto.FaceGeometry>>(_FACE_GEOMETRY_STREAM_NAME);
       if (faceTransformationMatrixesPacket != null)
       {
         GetFaceGeometryList(faceTransformationMatrixesPacket, faceGeometriesForRead);
         faceTransformationMatrixes ??= new List<UnityEngine.Matrix4x4>(faceGeometriesForRead.Count);
+        faceMeshes ??= new List<FaceLandmarkerResult.MeshData>(faceGeometriesForRead.Count);
 
         faceTransformationMatrixes.Clear();
         foreach (var faceGeometry in faceGeometriesForRead)
         {
           faceTransformationMatrixes.Add(faceGeometry.PoseTransformMatrix.ToMatrix4x4());
+          faceMeshes.Add(faceGeometry.Mesh.ToMeshData());
         }
       }
 
-      result = new FaceLandmarkerResult(faceLandmarks, faceBlendshapesList, faceTransformationMatrixes);
+      result = new FaceLandmarkerResult(faceLandmarks, faceBlendshapesList, faceTransformationMatrixes, faceMeshes);
       return true;
     }
   }
