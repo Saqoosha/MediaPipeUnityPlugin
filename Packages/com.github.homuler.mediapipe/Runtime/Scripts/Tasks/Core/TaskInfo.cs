@@ -82,7 +82,6 @@ namespace Mediapipe.Tasks.Core
             },
             InputStream = { inputStreams.Select(Tool.ParseNameFromStream).Append(finishedStream) },
             OutputStream = { throttledInputStreams.Select(Tool.ParseNameFromStream) },
-            InputSidePacket = { inputSidePackets },
             Options = flowLimiterOptions,
           },
           new CalculatorGraphConfig.Types.Node()
