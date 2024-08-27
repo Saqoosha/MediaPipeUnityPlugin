@@ -344,7 +344,7 @@ namespace Mediapipe.Tasks.Vision.FaceLandmarker
       }
 
       var faceTransformationMatrixes = result.facialTransformationMatrixes;
-      var faceMeshes = result.faceMeshes;
+      var faceMeshes = result.faceMeshData;
       using var faceTransformationMatrixesPacket = outputPackets.At<List<FaceGeometry.Proto.FaceGeometry>>(_FACE_GEOMETRY_STREAM_NAME);
       if (faceTransformationMatrixesPacket != null)
       {

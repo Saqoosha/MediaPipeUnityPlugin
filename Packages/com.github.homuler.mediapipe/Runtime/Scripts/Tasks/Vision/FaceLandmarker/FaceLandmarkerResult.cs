@@ -16,6 +16,13 @@ namespace Mediapipe.Tasks.Vision.FaceLandmarker
   /// </summary>
   public readonly struct FaceLandmarkerResult
   {
+    public struct MeshData
+    {
+      public Vector3[] vertices;
+      public Vector2[] uvs;
+      public int[] triangles;
+    }
+
     /// <summary>
     ///   Detected face landmarks in normalized image coordinates.
     /// </summary>
@@ -28,23 +35,18 @@ namespace Mediapipe.Tasks.Vision.FaceLandmarker
     ///   Optional facial transformation matrix.
     /// </summary>
     public readonly List<Matrix4x4> facialTransformationMatrixes;
-
-    public struct MeshData
-    {
-      public Vector3[] vertices;
-      public Vector2[] uvs;
-      public int[] triangles;
-    }
-
-    public readonly List<MeshData> faceMeshes;
+    /// <summary>
+    ///   Optional face mesh data.
+    /// </summary>
+    public readonly List<MeshData> faceMeshData;
 
     internal FaceLandmarkerResult(List<NormalizedLandmarks> faceLandmarks,
-        List<Classifications> faceBlendshapes, List<Matrix4x4> facialTransformationMatrixes, List<MeshData> faceMeshes)
+        List<Classifications> faceBlendshapes, List<Matrix4x4> facialTransformationMatrixes, List<MeshData> faceMeshData)
     {
       this.faceLandmarks = faceLandmarks;
       this.faceBlendshapes = faceBlendshapes;
       this.facialTransformationMatrixes = facialTransformationMatrixes;
-      this.faceMeshes = faceMeshes;
+      this.faceMeshData = faceMeshData;
     }
 
     public static FaceLandmarkerResult Alloc(int capacity, bool outputFaceBlendshapes = false, bool outputFaceTransformationMatrixes = false)
@@ -52,8 +54,8 @@ namespace Mediapipe.Tasks.Vision.FaceLandmarker
       var faceLandmarks = new List<NormalizedLandmarks>(capacity);
       var faceBlendshapes = outputFaceBlendshapes ? new List<Classifications>(capacity) : null;
       var facialTransformationMatrixes = outputFaceTransformationMatrixes ? new List<Matrix4x4>(capacity) : null;
-      var faceMeshes = outputFaceTransformationMatrixes ? new List<MeshData>(capacity) : null;
-      return new FaceLandmarkerResult(faceLandmarks, faceBlendshapes, facialTransformationMatrixes, faceMeshes);
+      var faceMeshData = outputFaceTransformationMatrixes ? new List<MeshData>(capacity) : null;
+      return new FaceLandmarkerResult(faceLandmarks, faceBlendshapes, facialTransformationMatrixes, faceMeshData);
     }
 
     public void CloneTo(ref FaceLandmarkerResult destination)
@@ -84,15 +86,24 @@ namespace Mediapipe.Tasks.Vision.FaceLandmarker
         dstFacialTransformationMatrixes.AddRange(facialTransformationMatrixes);
       }
 
-      var dstFaceMeshes = destination.faceMeshes;
-      if (faceMeshes != null)
+      var dstFaceMeshData = destination.faceMeshData;
+      if (faceMeshData != null)
       {
-        dstFaceMeshes ??= new List<MeshData>(faceMeshes.Count);
-        dstFaceMeshes.Clear();
-        dstFaceMeshes.AddRange(faceMeshes);
+        dstFaceMeshData ??= new List<MeshData>(faceMeshData.Count);
+        dstFaceMeshData.Clear();
+        foreach (var meshData in faceMeshData)
+        {
+          var newMeshData = new MeshData
+          {
+            vertices = (Vector3[])meshData.vertices.Clone(),
+            uvs = (Vector2[])meshData.uvs.Clone(),
+            triangles = (int[])meshData.triangles.Clone()
+          };
+          dstFaceMeshData.Add(newMeshData);
+        }
       }
 
-      destination = new FaceLandmarkerResult(dstFaceLandmarks, dstFaceBlendshapes, dstFacialTransformationMatrixes, dstFaceMeshes);
+      destination = new FaceLandmarkerResult(dstFaceLandmarks, dstFaceBlendshapes, dstFacialTransformationMatrixes, dstFaceMeshData);
     }
 
     public override string ToString()
