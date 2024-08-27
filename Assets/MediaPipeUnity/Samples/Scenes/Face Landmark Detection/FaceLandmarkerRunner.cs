@@ -40,7 +40,7 @@ namespace Mediapipe.Unity.Sample.FaceLandmarkDetection
       yield return AssetLoader.PrepareAssetAsync(config.ModelPath);
 
       var options = config.GetFaceLandmarkerOptions(config.RunningMode == Tasks.Vision.Core.RunningMode.LIVE_STREAM ? OnFaceLandmarkDetectionOutput : null);
-      taskApi = FaceLandmarker.CreateFromOptions(options, GpuManager.GpuResources);
+      taskApi = FaceLandmarker.CreateFromOptions(options, Camera.main.fieldOfView, GpuManager.GpuResources);
       var imageSource = ImageSourceProvider.ImageSource;
 
       yield return imageSource.Play();
