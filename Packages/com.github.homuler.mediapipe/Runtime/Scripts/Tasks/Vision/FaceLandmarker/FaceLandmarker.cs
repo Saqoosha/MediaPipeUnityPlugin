@@ -6,7 +6,6 @@
 
 using System.Collections.Generic;
 using Mediapipe.Tasks.Components.Containers;
-using Mediapipe.Tasks.Vision.FaceGeometry;
 
 namespace Mediapipe.Tasks.Vision.FaceLandmarker
 {
@@ -66,7 +65,7 @@ namespace Mediapipe.Tasks.Vision.FaceLandmarker
     {
       var baseOptions = new Tasks.Core.BaseOptions(modelAssetPath: modelPath);
       var options = new FaceLandmarkerOptions(baseOptions, runningMode: Core.RunningMode.IMAGE);
-      return CreateFromOptions(options, gpuResources);
+      return CreateFromOptions(options, gpuResources: gpuResources);
     }
 
     /// <summary>
@@ -80,7 +79,7 @@ namespace Mediapipe.Tasks.Vision.FaceLandmarker
     /// <returns>
     ///   <see cref="FaceLandmarker" /> object that's created from <paramref name="options" />.
     /// </returns>
-    public static FaceLandmarker CreateFromOptions(FaceLandmarkerOptions options, GpuResources gpuResources = null)
+    public static FaceLandmarker CreateFromOptions(FaceLandmarkerOptions options, float fov = 63f, GpuResources gpuResources = null)
     {
       var outputStreams = new List<string> {
         string.Join(":", _NORM_LANDMARKS_TAG, _NORM_LANDMARKS_STREAM_NAME),
@@ -104,35 +103,10 @@ namespace Mediapipe.Tasks.Vision.FaceLandmarker
         inputSidePackets: new List<string> { "ENVIRONMENT:environment" },
         taskOptions: options);
 
-      var faceGeometriesForRead = options.outputFaceTransformationMatrixes ? new List<FaceGeometry.Proto.FaceGeometry>(options.numFaces) : null;
-
       var graph = taskInfo.GenerateGraphConfig(options.runningMode == Core.RunningMode.LIVE_STREAM);
+      graph.Node.Insert(0, BuildEnvGeneratorCalculator(fov));
 
-      var environment = new FaceGeometry.Proto.Environment()
-      {
-        OriginPointLocation = FaceGeometry.Proto.OriginPointLocation.TopLeftCorner,
-        PerspectiveCamera = new FaceGeometry.Proto.PerspectiveCamera()
-        {
-          VerticalFovDegrees = 20f,
-          Near = 1.0f,
-          Far = 10000.0f,
-        }
-      };
-
-      var optionss = new CalculatorOptions();
-      optionss.SetExtension(FaceGeometryEnvGeneratorCalculatorOptions.Extensions.Ext, new FaceGeometryEnvGeneratorCalculatorOptions()
-      {
-        Environment = environment,
-      });
-
-      graph.Node.Insert(0, new CalculatorGraphConfig.Types.Node()
-      {
-        Calculator = "mediapipe.tasks.vision.face_geometry.FaceGeometryEnvGeneratorCalculator",
-        OutputSidePacket = { "ENVIRONMENT:environment" },
-        Options = optionss,
-      });
-      UnityEngine.Debug.Log(graph.ToString());
-
+      var faceGeometriesForRead = options.outputFaceTransformationMatrixes ? new List<FaceGeometry.Proto.FaceGeometry>(options.numFaces) : null;
       return new FaceLandmarker(
         graph,
         options.runningMode,
@@ -278,6 +252,29 @@ namespace Mediapipe.Tasks.Vision.FaceLandmarker
     private bool TryBuildFaceLandmarkerResult(PacketMap outputPackets, ref FaceLandmarkerResult result)
         => TryBuildFaceLandmarkerResult(outputPackets, _faceGeometriesForRead, ref result);
 
+    private static CalculatorGraphConfig.Types.Node BuildEnvGeneratorCalculator(float fov)
+    {
+      var options = new CalculatorOptions();
+      options.SetExtension(FaceGeometry.FaceGeometryEnvGeneratorCalculatorOptions.Extensions.Ext, new FaceGeometry.FaceGeometryEnvGeneratorCalculatorOptions()
+      {
+        Environment = new FaceGeometry.Proto.Environment()
+        {
+          OriginPointLocation = FaceGeometry.Proto.OriginPointLocation.TopLeftCorner,
+          PerspectiveCamera = new FaceGeometry.Proto.PerspectiveCamera()
+          {
+            VerticalFovDegrees = fov,
+            Near = 1.0f,
+            Far = 10000.0f,
+          }
+        },
+      });
+      return new CalculatorGraphConfig.Types.Node()
+      {
+        Calculator = "mediapipe.tasks.vision.face_geometry.FaceGeometryEnvGeneratorCalculator",
+        OutputSidePacket = { "ENVIRONMENT:environment" },
+        Options = options,
+      };
+    }
     private static Tasks.Core.TaskRunner.PacketsCallback BuildPacketsCallback(FaceLandmarkerOptions options,
         List<FaceGeometry.Proto.FaceGeometry> faceGeometriesForRead)
     {
