@@ -15,13 +15,15 @@ namespace Mediapipe.Tasks.Core
     public string taskGraph { get; }
     public List<string> inputStreams { get; }
     public List<string> outputStreams { get; }
+    public List<string> inputSidePackets { get; }
     public T taskOptions { get; }
 
-    public TaskInfo(string taskGraph, List<string> inputStreams, List<string> outputStreams, T taskOptions)
+    public TaskInfo(string taskGraph, List<string> inputStreams, List<string> outputStreams, T taskOptions, List<string> inputSidePackets = null)
     {
       this.taskGraph = taskGraph;
       this.inputStreams = inputStreams;
       this.outputStreams = outputStreams;
+      this.inputSidePackets = inputSidePackets;
       this.taskOptions = taskOptions;
     }
 
@@ -47,10 +49,12 @@ namespace Mediapipe.Tasks.Core
               Options = taskOptions.ToCalculatorOptions(),
               InputStream = { inputStreams },
               OutputStream = { outputStreams },
+              InputSidePacket = { inputSidePackets },
             },
           },
           InputStream = { inputStreams },
           OutputStream = { outputStreams },
+          InputSidePacket = { inputSidePackets },
         };
       }
 
@@ -78,6 +82,7 @@ namespace Mediapipe.Tasks.Core
             },
             InputStream = { inputStreams.Select(Tool.ParseNameFromStream).Append(finishedStream) },
             OutputStream = { throttledInputStreams.Select(Tool.ParseNameFromStream) },
+            InputSidePacket = { inputSidePackets },
             Options = flowLimiterOptions,
           },
           new CalculatorGraphConfig.Types.Node()
@@ -85,11 +90,13 @@ namespace Mediapipe.Tasks.Core
             Calculator = taskGraph,
             InputStream = { throttledInputStreams },
             OutputStream = { outputStreams },
+            InputSidePacket = { inputSidePackets },
             Options = taskOptions.ToCalculatorOptions(),
           },
         },
         InputStream = { inputStreams },
         OutputStream = { outputStreams },
+        InputSidePacket = { inputSidePackets },
       };
     }
 
