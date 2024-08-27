@@ -86,6 +86,7 @@ namespace Mediapipe.Tasks.Vision.ObjectDetector
           string.Join(":", _DETECTIONS_TAG, _DETECTIONS_OUT_STREAM_NAME),
           string.Join(":", _IMAGE_TAG, _IMAGE_OUT_STREAM_NAME),
         },
+        inputSidePackets: null,
         taskOptions: options);
 
       return new ObjectDetector(

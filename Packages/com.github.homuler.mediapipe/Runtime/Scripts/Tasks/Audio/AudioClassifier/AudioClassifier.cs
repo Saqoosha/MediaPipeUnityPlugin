@@ -77,6 +77,7 @@ namespace Mediapipe.Tasks.Audio.AudioClassifier
           string.Join(":", _CLASSIFICATIONS_TAG, _CLASSIFICATIONS_STREAM_NAME),
           string.Join(":", _TIMESTAMPED_CLASSIFICATIONS_TAG, _TIMESTAMPED_CLASSIFICATIONS_STREAM_NAME),
         },
+        inputSidePackets: null,
         taskOptions: options);
 
       return new AudioClassifier(

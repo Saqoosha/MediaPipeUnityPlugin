@@ -94,6 +94,7 @@ namespace Mediapipe.Tasks.Vision.PoseLandmarker
           string.Join(":", _NORM_RECT_TAG, _NORM_RECT_STREAM_NAME),
         },
         outputStreams: outputStreams,
+        inputSidePackets: null,
         taskOptions: options);
 
       return new PoseLandmarker(

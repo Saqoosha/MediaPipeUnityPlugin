@@ -18,7 +18,7 @@ namespace Mediapipe.Tasks.Core
     public List<string> inputSidePackets { get; }
     public T taskOptions { get; }
 
-    public TaskInfo(string taskGraph, List<string> inputStreams, List<string> outputStreams, T taskOptions, List<string> inputSidePackets = null)
+    public TaskInfo(string taskGraph, List<string> inputStreams, List<string> outputStreams, List<string> inputSidePackets, T taskOptions)
     {
       this.taskGraph = taskGraph;
       this.inputStreams = inputStreams;

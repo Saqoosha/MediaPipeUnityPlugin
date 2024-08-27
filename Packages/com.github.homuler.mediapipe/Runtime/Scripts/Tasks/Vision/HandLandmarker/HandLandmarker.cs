@@ -90,6 +90,7 @@ namespace Mediapipe.Tasks.Vision.HandLandmarker
           string.Join(":", _HAND_WORLD_LANDMARKS_TAG, _HAND_WORLD_LANDMARKS_STREAM_NAME),
           string.Join(":", _IMAGE_TAG, _IMAGE_OUT_STREAM_NAME),
         },
+        inputSidePackets: null,
         taskOptions: options);
 
       return new HandLandmarker(
